@@ -41,13 +41,18 @@ void grepFile(char *fileName, char *searchTerm) {
 }
 
 int main(int argc, char *argv[]) {
-    char buffer[128];
+    char *buffer = NULL;
+    size_t size = 0;
+    __ssize_t read;
 
     if (argc == 1) {
         fprintf(stdout, "my-grep: searchterm [file ...]\n");
         exit(1);
     } else if (argc == 2) {
-        while (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+        while ((read = getline(&buffer, &size, stdin)) != -1 ) {
+            if (read == 1) {
+                break;
+            }
             grep(buffer, argv[1]);
         }
         
@@ -56,6 +61,7 @@ int main(int argc, char *argv[]) {
             grepFile(argv[i], argv[1]);
         }
     }
-
+    free(buffer);
+    buffer = NULL;
     return 0;
 }
