@@ -31,7 +31,7 @@ void freeArray(char ***array) {
 // If the array is NULL, it allocates memory for the first element
 // If the array is not NULL, it reallocates memory to add the new element
 void addArgument(char ***array, char *arg) {
-
+    // This post helped with creating a dynamic array https://stackoverflow.com/questions/5935933/dynamically-create-an-array-of-strings-with-malloc
 
     if ((*array) == NULL) {
         (*array) = malloc(sizeof(char*) * 2);
@@ -121,7 +121,7 @@ void executeCommand(char **argv, char *path) {
 // Interactive mode function
 // Reads commands from the user and executes them
 // If the command is "exit", it breaks the loop and exits
-void interactiveMode(char ***paths, FILE * stream) {
+void shell(char ***paths, FILE * stream) {
     char *command = NULL;
     char ***commandArray = NULL;
     char *token = NULL;
@@ -231,6 +231,9 @@ void interactiveMode(char ***paths, FILE * stream) {
 
             int commandCount = 0;
             int argCount = 0;
+
+            // Loop through the arguments and split them into commands
+            // based on the "&" character
             for (int j = 0; j < arrayLength(argArray); j++) {
                 if (strcmp(argArray[j], "&") == 0) {
                     commandCount++;
@@ -255,6 +258,8 @@ void interactiveMode(char ***paths, FILE * stream) {
                 argCount++;
             }
 
+            // Execute the commands in parallel
+            // This post helped here: https://stackoverflow.com/questions/65202550/fork-4-children-in-a-loop
             for (int j = 0; j <= commandCount; j++){
                 pid_t pid = fork();
                 if (pid == 0) {
@@ -306,7 +311,7 @@ int main(int argc, char *argv[]) {
 
     switch (argc) {
     case 1:
-        interactiveMode(&paths, stdin);
+        shell(&paths, stdin);
         break;
     case 2:
         FILE *batchFile = fopen(argv[1], "r");
@@ -314,7 +319,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "error: cannot open file '%s'\n", argv[1]);
             exit(1);
         }
-        interactiveMode(&paths, batchFile);
+        shell(&paths, batchFile);
         fclose(batchFile);
         break;
     default:
